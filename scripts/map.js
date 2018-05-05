@@ -1,133 +1,136 @@
-
-window.CodeClubWorld = {};
+var g = {};
+/**
+* Main function that will run once the DOM is fully loaded
+*
+*/
 $(function() {
-  // TODO: add your API key
-  CodeClubWorld.api_token = 'ROe90450b2a7fd5fefdaa57c51aead395927510b4ea7b133fe0f298747cc50d8aa';
-
-  // TODO: add your Country Code here
-  CodeClubWorld.country_code = 'CA';
-
-  CodeClubWorld.api = 'https://api.codeclubworld.org';
-  CodeClubWorld.api_version = '2';
-
-  CodeClubWorld.makeMap();
-
-  CodeClubWorld.region = document.getElementById('region-search');
-  if(CodeClubWorld.region){
-    CodeClubWorld.region.onchange = CodeClubWorld.makeMap;
+  g.path = "./";
+  console.log("hello", $('#language .active a').html())
+  if ($('#language .active a').html() !== 'EN') {
+    g.path = '../';
+    console.log("here", g.path + "php/clubsJson.php")
   }
-  CodeClubWorld.infobox = new google.maps.InfoWindow();
+  g.region = document.getElementById('region-search');
+  g.infobox = new google.maps.InfoWindow();
+  g.file = g.request = createRequestObject();
 
+  g.file.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+        g.res = JSON.parse(this.responseText);
+        makeMap();
+        if(g.region){
+          g.region.onchange = makeMap;
+        }
+    }
+  };
+
+  //Note: in production, it needs to be g.path + "php/clubsJson.php" for FR map to work.
+  g.file.open("GET", "php/clubsJson.php", true);
+  g.file.send();
 });
 
-CodeClubWorld.makeMap = function() {
-//  console.log("makeMap called");
-  var el = document.getElementById('map');
-  //console.log(el);
-  if (!el) return;
+/**
+* Logical function, responsible for creating the map,
+* markers and placing the information from the json onto
+* the marker info box.
+*
+*/
+function makeMap() {
+  var clubs = g.res, lat, lng, dataZ, LatLng
+      markers = [];
+  console.log(clubs.length);
+  console.log(clubs);
+  //checks if there is a province selected in the select tag.
+   if(g.region){
+     lat = parseInt(g.region.options[g.region.selectedIndex].getAttribute("data-lat"));
+     lng = parseInt(g.region.options[g.region.selectedIndex].getAttribute("data-lng"));
+     dataZ = parseInt(g.region.options[g.region.selectedIndex].getAttribute("data-z"));
+     LatLng = new google.maps.LatLng(lat, lng);
+   } else {
+     dataZ = 4;
+     LatLng = new google.maps.LatLng(52.0, -95.5);
+   }
 
-  $.ajax({
-    method      : 'GET',
-    url         : CodeClubWorld.api + '/clubs?in_country=' + CodeClubWorld.country_code,
-    contentType : 'application/json',
-    headers     : { 'Authorization': 'Bearer ' + CodeClubWorld.api_token, 'Accept': 'application/vnd.codeclubworld.v'+CodeClubWorld.api_version }
-  })
-  .done( function(data) {
-    var clubs = data, lat, lng, dataZ, LatLng
-        markers = [];
-
-  //  console.log(clubs);
-    if(CodeClubWorld.region){
-      lat = parseInt(CodeClubWorld.region.options[CodeClubWorld.region.selectedIndex].getAttribute("data-lat"));
-      lng = parseInt(CodeClubWorld.region.options[CodeClubWorld.region.selectedIndex].getAttribute("data-lng"));
-      dataZ = parseInt(CodeClubWorld.region.options[CodeClubWorld.region.selectedIndex].getAttribute("data-z"));
-      LatLng = new google.maps.LatLng(lat, lng);
-    } else {
-      dataZ = 4;
-      LatLng = new google.maps.LatLng(52.0, -95.5);
-    }
-
-//    console.log(LatLng.toString());
-    var map = new google.maps.Map(el, {
+  var map = new google.maps.Map(document.getElementById('map'), {
       zoom: dataZ,
       center: LatLng,
       scrollwheel: false,
       mapTypeId: google.maps.MapTypeId.ROADMAP
     });
-
-  //  console.log(LatLng.toString());
-//    console.log(data);
-    $.each(clubs, function(i, club) {
-      var address = club.venue.address;
+    $.each(g.res, function(i, club) {
+      var address = club.Address;
       if (!address) return;
 
-      var lat = address.latitude,
-          lng = address.longitude;
+      var lat = club.Latitude,
+          lng = club.Longitude;
 
       if (lat === null || lng === null) return;
-
       var latLng = new google.maps.LatLng(lat, lng),
           marker = new google.maps.Marker({
             position: latLng,
-            icon: 'img/marker.png'
-          });
-
-      markers.push(marker);
-
+            map: map,
+            icon: g.path + 'img/marker.png'
+      });//end of setting the marker
+      if(club.Name !== 'Hamilton Code Club' && club.Name !== 'IEC of Hamilton'
+                    && club.CountryCode === 'CA'){
+          // console.log(club);
+        markers.push(marker);
+      }
       google.maps.event.addListener(marker, 'click', function() {
-        var infobox = CodeClubWorld.infobox;
+        var infobox = g.infobox;
         infobox.close();
 
         var content = [];
-
-        if (club.name){
-          content.push('<h5 class="text-green text-uppercase">' + club.name  +'</h5>');
+        // the following if statments will check if the information is availabke
+        // for said club and if it is places it onto the info box of said marker.
+        if (club.Name){
+          content.push('<h5 class="text-green text-uppercase">' + club.Name  +'</h5>');
         }
 
-        if (club.venue.address.city) {
-          content.push('<p>City: ' + club.venue.address.city + '</p>');
+        if (club.City) {
+          content.push('<p>City: ' + club.City + '</p>');
+        }
+        if (club.Name) {
+          content.push('<p>Name: ' + club.Name + '</p>');
+        }
+        if (club.Address) {
+          content.push('<p>Address: ' + club.Address + '</p>');
+        }
+        if (club.PostalCode) {
+          content.push('<p>Postal Code: ' + club.PostalCode + '</p>');
+        }
+        if (club.Url) {
+          content.push('<a target="_blank" href="' + club.Url + '">' + club.Url + '</a>');
+        }
+        if (club.Id) {
+          content.push('<p><a class="btn btn-green" href="contactVenueForm.html?club_id=' + club.Id + '">Contact</a></p>');
         }
 
-        if (club.venue.address.country) {
-          content.push('<p>' + club.venue.address.country.name + '</p>');
-        }
-
-        if (club.looking_for_volunteer == true) {
-          content.push('<p><span class="glyphicon glyphicon-ok"></span> Looking for volunteers</p>');
-          if (club.venue.url) {
-            content.push(
-              '<a class="d-block padding-xxs" href="' + club.venue.url + '">' +
-                club.venue.url +
-              '</a>'
-            );
-          }
-          content.push('<a class="btn btn-border-green" href="https://www.codeclub.org.uk/start-a-club/volunteers">Volunteer</a>');
-        } else {
-          content.push('<p><span class="glyphicon glyphicon-remove"></span> Looking for volunteers</p>');
-          if (club.venue.url) {
-            content.push(
-              '<a class="d-block padding-xxs" href="' + club.venue.url + '">' +
-                club.venue.url +
-              '</a>'
-            );
-          }
-        }
         content = content.join('');
         infobox.setContent(content);
         infobox.open(map, marker);
-      });
-    });
-
+      });//end of addListener
+    });//end of foreach
     $('.counter').replaceWith(clubs.length);
-    // TODO: I've commented out the styles section to make
-    // this work in jsbin. Leave the styles section of the
-    // mcOptions "as is"
     var mcOptions = {
-      gridSize: 30,
-      imagePath: 'img/m'
+      gridSize: 35,
+      imagePath: g.path + 'img/m'
     };
 
    var markerCluster = new MarkerClusterer(map, markers, mcOptions);
+}
 
-  });
-};
+/**
+* Helper function that creates a cross browser compatible object
+* of a request object.
+*
+*/
+function createRequestObject() {
+  var request;
+  if (window.XMLHttpRequest) {
+		request = new XMLHttpRequest();
+  } else {
+		request = new ActiveXObject("Microsoft.XMLHTTP");
+  }
+  return request;
+}

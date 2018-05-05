@@ -98,7 +98,7 @@ strong{
     margin-right:-4px;
 }
 .after-nav {
-  margin-top: 60px;
+  margin-top: 90px;
 }
 
 .align-middle{
@@ -245,7 +245,9 @@ strong{
     color: white;
 }
 .border-xs {
-  border: 1px solid;
+  background-color: white;
+  border: 0px solid;
+  box-shadow: 1px 1px lightgrey;
 }
 .border-s{
   border: 3px solid;
@@ -264,6 +266,9 @@ strong{
 }
 .border-radius{
   border-radius: 20px;
+}
+.border-radius-s{
+  border-radius: 8px;
 }
 .border-top-radius{
   border-top-right-radius: 20px;
@@ -293,12 +298,19 @@ strong{
 .d-table-cell{
   display: table-cell;
 }
-.container-custom{
+.container-custom {
   max-width: 850px;
-  min-width: 450px;
+  /* min-width: 450px; */
   margin-left: auto;
   margin-right: auto;
 }
+
+@media (min-width: 1150px){
+  .container-nav {
+    width: 1275px;
+  }
+}
+
 .center-block{
   display: block;
   margin-left: auto;
@@ -325,11 +337,14 @@ strong{
   height: 450px;
 }
 .height-480{
-  height: 480px;
+  height: 495px;
 }
 
 .height-500{
   height: 500px;
+}
+.height-550 {
+  height: 550px;
 }
 .img-max{
   max-width: 250px;
@@ -408,6 +423,17 @@ strong{
   width: 100%;
   height: 600px;
 }
+
+.mininav .active {
+  border: 3px solid green;
+  border-radius: 15px;
+}
+.center-vertical {
+  height: 220px;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
 .navbar-custom {
   background-color: white;
   color: #ffffff;
@@ -450,6 +476,10 @@ strong{
 
 .navbar-custom .icon-bar {
   background-color: #479946;
+}
+
+#language .active {
+  text-decoration: underline;
 }
 .padding-xxs{
   padding: 5px;
@@ -503,6 +533,10 @@ strong{
   padding-left: 10px;
   padding-right: 10px;
 }
+.padding-x-m{
+  padding-left: 15px;
+  padding-right: 15px;
+}
 .padding-y-xxs{
   padding-top:2px;
   padding-bottom:2px;
@@ -518,6 +552,14 @@ strong{
 .padding-y-m{
   padding-top: 20px;
   padding-bottom: 20px;
+}
+.padding-y-l {
+  padding-top: 30px;
+  padding-bottom: 30px;
+}
+.padding-y-xl {
+  padding-top: 45px;
+  padding-bottom: 45px;
 }
 .pos-fixed {
   position: fixed;
@@ -546,6 +588,9 @@ strong{
 }
 .text-xs{
   font-size: 14px;
+}
+.text-xxs{
+  font-size: 12px;
 }
 .text-blue {
   color: #3bb2f7;
@@ -634,6 +679,7 @@ strong{
   border-radius: 50px;
   text-align: center;
   font-size: 30px;
+  background-color: white;
 }
 .social-links-m i{
   height: 45px;
@@ -860,4 +906,28 @@ footer input[type^="email"]{
 
 #mc-embedded-subscribe{
   margin: 0;
+}
+
+/* FRENCH */
+
+#french:before {
+  background-color: green;
+}
+
+#french {
+  color: red;
+  background-color: green;
+  border-radius: 50%;
+  height: 50px;
+  width: 50px;
+}
+
+/* offset anchor for fixed header */
+
+.offset:before {
+  display: block;
+   content: " ";
+    height: 150px;      /* Give height of your fixed element */
+      margin-top: -150px; /* Give negative margin of your fixed element */
+     visibility: hidden;
 }
